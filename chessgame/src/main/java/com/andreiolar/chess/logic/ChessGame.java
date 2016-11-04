@@ -3,9 +3,14 @@ package com.andreiolar.chess.logic;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class used to define the behavior of a chess game.
+ * 
+ * @author Andrei Olar
+ **/
 public class ChessGame implements Runnable {
 
-	private int gameState = GAME_STATE_WHITE;
+	public int gameState = -1;
 	public static final int GAME_STATE_WHITE = 0;
 	public static final int GAME_STATE_BLACK = 1;
 	public static final int GAME_STATE_END_BLACK_WON = 2;
@@ -19,6 +24,9 @@ public class ChessGame implements Runnable {
 	private IPlayerHandler whitePlayerHandler;
 	private IPlayerHandler activePlayerHandler;
 
+	/**
+	 * Constructor. Used to create all the chess pieces.
+	 **/
 	public ChessGame() {
 		this.moveValidator = new MoveValidator(this);
 
@@ -53,6 +61,15 @@ public class ChessGame implements Runnable {
 		}
 	}
 
+	/**
+	 * Used to set the player.
+	 * 
+	 * @param pieceColor
+	 *            The color to set to player.
+	 * 
+	 * @param playerHandler
+	 *            The player handler. Could be player or AI.
+	 **/
 	public void setPlayer(int pieceColor, IPlayerHandler playerHandler) {
 		switch (pieceColor) {
 			case Piece.COLOR_BLACK :
@@ -66,6 +83,9 @@ public class ChessGame implements Runnable {
 		}
 	}
 
+	/**
+	 * Used to start the game and defines the work flow of the running the game.
+	 **/
 	public void startGame() {
 		// Check if all players are ready
 		System.out.println("ChessGame: waiting for players");
@@ -99,6 +119,9 @@ public class ChessGame implements Runnable {
 		}
 	}
 
+	/**
+	 * Swaps the active players.
+	 **/
 	private void swapActivePlayer() {
 		if (this.activePlayerHandler == this.whitePlayerHandler) {
 			this.activePlayerHandler = this.blackPlayerHandler;
@@ -109,6 +132,9 @@ public class ChessGame implements Runnable {
 		this.changeGameState();
 	}
 
+	/**
+	 * Used to wait for the player to move, and execute the move.
+	 **/
 	private void waitForMove() {
 		Move move = null;
 
@@ -139,11 +165,20 @@ public class ChessGame implements Runnable {
 		}
 	}
 
+	/**
+	 * Creates and adds the chess piece.
+	 **/
 	private void createAndAddPiece(int color, int type, int row, int column) {
 		Piece piece = new Piece(color, type, row, column);
 		this.pieces.add(piece);
 	}
 
+	/**
+	 * Used to move a piece.
+	 * 
+	 * @param move
+	 *            The move to be done.
+	 **/
 	public boolean movePiece(Move move) {
 		move.capturedPiece = this.getNonCapturedPieceAtLocation(move.targetRow, move.targetColumn);
 
@@ -165,6 +200,9 @@ public class ChessGame implements Runnable {
 		return true;
 	}
 
+	/**
+	 * Used to undo a move. Only used in AI implementation to search for different routes.
+	 **/
 	public void undoMove(Move move) {
 		Piece piece = getNonCapturedPieceAtLocation(move.targetRow, move.targetColumn);
 
@@ -186,6 +224,11 @@ public class ChessGame implements Runnable {
 		}
 	}
 
+	/**
+	 * Check whether the game ended.
+	 * 
+	 * @return Returns true if end condition is reached, false otherwise.
+	 **/
 	private boolean isGameEndConditionReached() {
 		for (Piece piece : this.capturedPieces) {
 			if (piece.getType() == Piece.TYPE_KING) {
@@ -234,6 +277,9 @@ public class ChessGame implements Runnable {
 		return this.pieces;
 	}
 
+	/**
+	 * Used to change the game state.
+	 **/
 	public void changeGameState() {
 		if (this.isGameEndConditionReached()) {
 			if (this.gameState == ChessGame.GAME_STATE_BLACK) {
@@ -264,6 +310,9 @@ public class ChessGame implements Runnable {
 		return this.moveValidator;
 	}
 
+	/**
+	 * Runs the game logic.
+	 **/
 	@Override
 	public void run() {
 		this.startGame();
