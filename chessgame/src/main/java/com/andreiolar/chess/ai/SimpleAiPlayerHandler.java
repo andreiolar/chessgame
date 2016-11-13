@@ -9,6 +9,11 @@ import com.andreiolar.chess.logic.Move;
 import com.andreiolar.chess.logic.MoveValidator;
 import com.andreiolar.chess.logic.Piece;
 
+/**
+ * AI player handler. Will act as a computer player. Main AI algorithm used is Minimax with alpha-beta pruning.
+ * 
+ * @author Andrei Olar
+ **/
 public class SimpleAiPlayerHandler implements IPlayerHandler {
 
 	private ChessGame chessGame;
@@ -26,18 +31,22 @@ public class SimpleAiPlayerHandler implements IPlayerHandler {
 		return getBestMove();
 	}
 
+	/**
+	 * Used to get the best move possible. Loops over all moves possible and applies the Minimax algorithm with alpha-beta pruning.
+	 * 
+	 * @return Returns the best possible move.
+	 **/
 	private Move getBestMove() {
-		System.out.println("getting best move");
-		// ChessConsole.printCurrentGameState(this.chessGame);
-		System.out.println("thinking...");
+		System.out.println("Getting best move");
+		System.out.println("Thinking...");
 
-		List<Move> validMoves = generateMoves(false);
+		List<Move> validMoves = generateMoves();
 		int bestResult = Integer.MIN_VALUE;
 		Move bestMove = null;
 
 		for (Move move : validMoves) {
 			executeMove(move);
-			int evaluationResult = -1 * negaMax(this.maxDepth, "");
+			int evaluationResult = -1 * alphaBetaMax(-9999, 9999, this.maxDepth);
 			undoMove(move);
 			if (evaluationResult > bestResult) {
 				bestResult = evaluationResult;
@@ -49,33 +58,63 @@ public class SimpleAiPlayerHandler implements IPlayerHandler {
 		return bestMove;
 	}
 
-	@Override
-	public void moveSuccessfullyExecuted(Move move) {
-		System.out.println("executed: " + move);
-	}
-
-	private int negaMax(int depth, String indent) {
-
-		if (depth <= 0 || this.chessGame.getGameState() == ChessGame.GAME_STATE_END_WHITE_WON
+	/**
+	 * The max part of the alpha-beta pruning.
+	 **/
+	private int alphaBetaMax(int alpha, int beta, int depthLeft) {
+		if (depthLeft == 0 || this.chessGame.getGameState() == ChessGame.GAME_STATE_END_WHITE_WON
 				|| this.chessGame.getGameState() == ChessGame.GAME_STATE_END_BLACK_WON) {
-
 			return evaluateState();
 		}
 
-		List<Move> moves = generateMoves(false);
-		int currentMax = Integer.MIN_VALUE;
+		List<Move> moves = generateMoves();
+		for (Move move : moves) {
+			executeMove(move);
+			int score = alphaBetaMin(alpha, beta, depthLeft - 1);
+			undoMove(move);
 
-		for (Move currentMove : moves) {
+			if (score >= beta) {
+				return beta;
+			}
 
-			executeMove(currentMove);
-			int score = -1 * negaMax(depth - 1, indent + " ");
-			undoMove(currentMove);
-
-			if (score > currentMax) {
-				currentMax = score;
+			if (score > alpha) {
+				alpha = score;
 			}
 		}
-		return currentMax;
+
+		return alpha;
+	}
+
+	/**
+	 * The min part of the alpha-beta pruning.
+	 **/
+	private int alphaBetaMin(int alpha, int beta, int depthLeft) {
+		if (depthLeft == 0 || this.chessGame.getGameState() == ChessGame.GAME_STATE_END_WHITE_WON
+				|| this.chessGame.getGameState() == ChessGame.GAME_STATE_END_BLACK_WON) {
+			return evaluateState();
+		}
+
+		List<Move> moves = generateMoves();
+		for (Move move : moves) {
+			executeMove(move);
+			int score = alphaBetaMax(alpha, beta, depthLeft - 1);
+			undoMove(move);
+
+			if (score <= alpha) {
+				return alpha;
+			}
+
+			if (score < beta) {
+				beta = score;
+			}
+		}
+
+		return beta;
+	}
+
+	@Override
+	public void moveSuccessfullyExecuted(Move move) {
+		System.out.println("executed: " + move);
 	}
 
 	private void undoMove(Move move) {
@@ -87,7 +126,12 @@ public class SimpleAiPlayerHandler implements IPlayerHandler {
 		this.chessGame.changeGameState();
 	}
 
-	private List<Move> generateMoves(boolean debug) {
+	/**
+	 * Used to generate all possible moves.
+	 * 
+	 * @return Returns a list of all possible moves.
+	 **/
+	private List<Move> generateMoves() {
 
 		List<Piece> pieces = this.chessGame.getPieces();
 		List<Move> validMoves = new ArrayList<Move>();
@@ -111,9 +155,6 @@ public class SimpleAiPlayerHandler implements IPlayerHandler {
 						testMove.targetRow = targetRow;
 						testMove.targetColumn = targetColumn;
 
-						if (debug)
-							System.out.println("testing move: " + testMove);
-
 						if (this.validator.isMoveValid(testMove, true)) {
 							validMoves.add(testMove.clone());
 						}
@@ -124,6 +165,11 @@ public class SimpleAiPlayerHandler implements IPlayerHandler {
 		return validMoves;
 	}
 
+	/**
+	 * Used to evaluate the current state based on specific criteria.
+	 * 
+	 * @return Returns a evaluation score.
+	 **/
 	private int evaluateState() {
 		int scoreWhite = 0;
 		int scoreBlack = 0;

@@ -310,6 +310,10 @@ public class ChessGame implements Runnable {
 		return this.moveValidator;
 	}
 
+	public IPlayerHandler getActivePlayerHandler() {
+		return activePlayerHandler;
+	}
+
 	/**
 	 * Runs the game logic.
 	 **/

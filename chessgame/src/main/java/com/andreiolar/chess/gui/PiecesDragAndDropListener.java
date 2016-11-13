@@ -98,8 +98,6 @@ public class PiecesDragAndDropListener implements MouseListener, MouseMotionList
 			int x = evt.getPoint().x - this.dragOffsetX;
 			int y = evt.getPoint().y - this.dragOffsetY;
 
-			System.out.println("row:" + ChessGui.convertYToRow(y) + " column:" + ChessGui.convertXToColumn(x));
-
 			GuiPiece dragPiece = this.chessGui.getDragPiece();
 			dragPiece.setX(x);
 			dragPiece.setY(y);

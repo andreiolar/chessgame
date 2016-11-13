@@ -40,7 +40,7 @@ public class MoveValidator {
 
 		// Check if target location within boundaries
 		if (targetRow < Piece.ROW_1 || targetRow > Piece.ROW_8 || targetColumn < Piece.COLUMN_A || targetColumn > Piece.COLUMN_H) {
-			log("target row or column out of scope");
+			log("Target row or column out of scope");
 			return false;
 		}
 
@@ -226,7 +226,6 @@ public class MoveValidator {
 		} else if (sourceRow + 1 == targetRow && sourceColumn - 1 == targetColumn) {// up left
 			isValid = true;
 		} else {
-			System.out.println("moving too far");
 			isValid = false;
 		}
 

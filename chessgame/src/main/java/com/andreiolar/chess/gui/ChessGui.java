@@ -386,7 +386,7 @@ public class ChessGui extends JPanel implements IPlayerHandler {
 
 	public static void main(String[] args) {
 		ChessGame chessGame = new ChessGame();
-		ChessGui chessGui = new ChessGui(chessGame);
+		new ChessGui(chessGame);
 		chessGame.setPlayer(Piece.COLOR_WHITE, null);
 		chessGame.setPlayer(Piece.COLOR_BLACK, null);
 		new Thread(chessGame).start();
